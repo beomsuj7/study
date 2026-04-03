@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>📚 Study Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="개인 학습 내용 정리 저장소">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <style>
+    :root {
+      --theme-color: #3F51B5;
+    }
+    .sidebar .sidebar-nav ul li a {
+      font-size: 14px;
+    }
+    .cover-main h1 {
+      font-size: 2.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">📚 로딩 중...</div>
+  <script>
+    window.$docsify = {
+      name: '📚 Study Notes',
+      repo: 'beomsuj7/study',
+      loadSidebar: true,
+      loadNavbar: false,
+      subMaxLevel: 3,
+      auto2top: true,
+      homepage: 'README.md',
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: '검색...',
+        noData: '결과 없음',
+        depth: 3,
+      },
+      pagination: {
+        previousText: '이전',
+        nextText: '다음',
+        crossChapter: true,
+      },
+      themeColor: '#3F51B5',
+    }
+  </script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+</body>
+</html>

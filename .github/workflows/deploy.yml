@@ -1,0 +1,59 @@
+name: GitHub Pages 배포
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 사이드바 자동 생성
+        run: python scripts/generate_sidebar.py
+
+      - name: 사이드바 변경사항 커밋
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet _sidebar.md; then
+            git add _sidebar.md
+            git commit -m "🤖 사이드바 자동 업데이트 [skip ci]"
+            git push
+          else
+            echo "사이드바 변경 없음"
+          fi
+
+      - name: GitHub Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: Pages 아티팩트 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: GitHub Pages 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
