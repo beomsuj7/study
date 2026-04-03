@@ -44,6 +44,10 @@ while IFS= read -r -d '' dir; do
     fi
 
     echo "📅 커밋 생성: $dir (날짜: $DATE)"
+    GIT_AUTHOR_NAME="beomsuj7" \
+    GIT_AUTHOR_EMAIL="anelitgel12@naver.com" \
+    GIT_COMMITTER_NAME="beomsuj7" \
+    GIT_COMMITTER_EMAIL="anelitgel12@naver.com" \
     GIT_AUTHOR_DATE="$COMMIT_DATE" \
     GIT_COMMITTER_DATE="$COMMIT_DATE" \
       git commit -m "📅 ${DATE} 학습 내용 추가
