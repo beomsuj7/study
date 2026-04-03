@@ -1,3 +1,16 @@
+---
+title: "sql코테 정리"
+date: 
+category: "코딩테스트"
+tags: [SQL, 코딩테스트]
+---
+
+# sql코테 정리
+
+> -- 코드를 입력하세요
+
+---
+
 ```sql
 -- 코드를 입력하세요
 SELECT DATETIME
@@ -93,7 +106,3 @@ SELECT BOARD_ID, WRITER_ID, TITLE, PRICE,
 FROM USED_GOODS_BOARD
 where created_date = "2022-10-05"
 ORDER BY BOARD_ID desc;
-
-
-
-```
