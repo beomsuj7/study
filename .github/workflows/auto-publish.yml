@@ -1,0 +1,126 @@
+name: 날짜별 자동 발행
+
+# drafts/YYYYMMDD/ 폴더의 내용을 해당 날짜에 자동으로 발행합니다.
+#
+# 사용법:
+#   1. drafts/20250102/ 폴더를 생성하고 내용을 추가합니다.
+#   2. 해당 파일을 커밋하고 main 브랜치에 푸시합니다.
+#   3. 2025-01-02 자정(KST)에 이 워크플로가 자동으로 실행됩니다.
+#   4. drafts/20250102/ 내의 서브폴더가 루트 카테고리 폴더로 이동됩니다.
+#
+# 예시 폴더 구조:
+#   drafts/
+#     20250102/
+#       코딩테스트/      ← 루트의 '코딩테스트/' 폴더로 이동
+#         문제풀이.md
+#       자바/            ← 루트의 '자바/' 폴더로 이동
+#         학습정리.md
+
+on:
+  schedule:
+    # 매일 자정 KST (= 15:00 UTC) 실행
+    # 한국은 서머타임을 적용하지 않으므로 UTC+9로 고정됩니다.
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: '발행할 날짜 (YYYYMMDD 형식, 비워두면 오늘 날짜 사용)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  auto-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 발행 날짜 결정
+        id: date
+        run: |
+          if [[ -n "${{ github.event.inputs.target_date }}" ]]; then
+            TODAY="${{ github.event.inputs.target_date }}"
+          else
+            # KST (UTC+9)
+            TODAY=$(TZ='Asia/Seoul' date '+%Y%m%d')
+          fi
+          echo "TODAY=$TODAY" >> $GITHUB_OUTPUT
+          echo "발행 날짜: $TODAY"
+
+      - name: drafts 폴더 확인 및 발행
+        id: publish
+        run: |
+          TODAY="${{ steps.date.outputs.TODAY }}"
+          DRAFT_DIR="drafts/$TODAY"
+
+          if [[ ! -d "$DRAFT_DIR" ]]; then
+            echo "오늘($TODAY)의 초안 폴더가 없습니다."
+            echo "PUBLISHED=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "초안 폴더 발견: $DRAFT_DIR"
+          PUBLISHED=false
+
+          # 서브폴더를 루트 카테고리로 이동
+          for subdir in "$DRAFT_DIR"/*/; do
+            [[ -d "$subdir" ]] || continue
+            CATEGORY="$(basename "$subdir")"
+            echo "  📂 '$CATEGORY' 카테고리로 이동 중..."
+            mkdir -p "$CATEGORY"
+            if cp -r "$subdir"* "$CATEGORY/"; then
+              PUBLISHED=true
+            else
+              echo "  ⚠️ '$CATEGORY' 복사 실패"
+            fi
+          done
+
+          # 서브폴더가 없으면 초안 폴더 내 파일을 직접 처리
+          if [[ "$PUBLISHED" == "false" ]]; then
+            echo "  📄 루트 파일 발행 중..."
+            find "$DRAFT_DIR" -maxdepth 1 -type f | while read -r file; do
+              cp "$file" .
+            done
+            PUBLISHED=true
+          fi
+
+          # 발행된 초안 폴더 제거
+          rm -rf "$DRAFT_DIR"
+
+          echo "PUBLISHED=$PUBLISHED" >> $GITHUB_OUTPUT
+
+      - name: Python 설정
+        if: steps.publish.outputs.PUBLISHED == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 사이드바 업데이트
+        if: steps.publish.outputs.PUBLISHED == 'true'
+        run: python scripts/generate_sidebar.py
+
+      - name: 변경사항 커밋 및 푸시
+        if: steps.publish.outputs.PUBLISHED == 'true'
+        run: |
+          TODAY="${{ steps.date.outputs.TODAY }}"
+          YEAR="${TODAY:0:4}"
+          MONTH="${TODAY:4:2}"
+          DAY="${TODAY:6:2}"
+          DATE_FMT="${YEAR}-${MONTH}-${DAY}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "📅 ${DATE_FMT} 학습 내용 자동 발행"
+            git push
+            echo "✅ ${DATE_FMT} 내용이 발행되었습니다."
+          else
+            echo "커밋할 변경사항이 없습니다."
+          fi
