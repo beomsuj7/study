@@ -326,6 +326,22 @@
         nextText: '다음 →',
         crossChapter: true,
       },
+      count:{
+        countable:true,
+        fontsize:'0.9em',
+        color:'rgb(90,90,90)',
+        language:'korean'
+      },
+      tabs: {
+        persist    : true,
+        sync       : true,
+        theme      : 'classic',
+        tabComments: true,
+        tabHeadings: true
+      },
+      plantuml: {
+        skin: 'default'
+      },
       themeColor: '#5B6DCD',
       // frontmatter 플러그인
       frontMatter: {
@@ -374,6 +390,14 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <!-- 사이드바 접기 플러그인 -->
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
+  <!-- 이미지 줌(확대) 기능 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+  <!-- 글자 수 계산 및 읽는 시간 표시 -->
+  <script src="//unpkg.com/docsify-count/dist/countable.js"></script>
+  <!-- 마크다운 내 탭뷰 구성 기능 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+  <!-- PlantUML 시각화 (UML, 다이어그램) -->
+  <script src="//unpkg.com/docsify-plantuml/dist/docsify-plantuml.min.js"></script>
   <!-- 코드 하이라이팅 -->
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>

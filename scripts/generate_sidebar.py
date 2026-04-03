@@ -102,39 +102,39 @@ def generate_sidebar():
         if not tags: by_tag['기타'].append(info)
         for t in tags: by_tag[t.capitalize()].append(info)
 
-    lines = ['* [🏠 홈](/)', '']
+    lines = ['- [🏠 홈](/)', '']
 
     # 1. 📅 작성 연도별
-    lines.append('* **📅 작성 연도별**')
+    lines.append('- 📅 작성 연도별')
     for y in sorted(by_date.keys(), reverse=True):
         if y == '미분류': continue
-        lines.append(f'  * **{y}년**')
+        lines.append(f'  - {y}년')
         for m in sorted(by_date[y].keys(), reverse=True):
-            lines.append(f'    * **{m}월**')
+            lines.append(f'    - {m}월')
             for (_, title, enc) in sorted(by_date[y][m], key=lambda x: x[0].name):
-                lines.append(f'      * [{title}]({enc})')
+                lines.append(f'      - [{title}]({enc})')
     
     if '미분류' in by_date and by_date['미분류']['']:
-        lines.append('  * **미기재/기타**')
+        lines.append('  - 미기재/기타')
         for (_, title, enc) in sorted(by_date['미분류'][''], key=lambda x: x[1]):
-            lines.append(f'    * [{title}]({enc})')
+            lines.append(f'    - [{title}]({enc})')
     lines.append('')
 
     # 2. 🏷️ 언어 / 기술 / 커스텀 태그별
-    lines.append('* **🏷️ 언어/기술/커스텀 태그별**')
+    lines.append('- 🏷️ 언어/기술/커스텀 태그별')
     for tag in sorted(by_tag.keys()):
         if tag == '기타': continue
-        lines.append(f'  * **{tag}**')
+        lines.append(f'  - {tag}')
         for (_, title, enc) in sorted(by_tag[tag], key=lambda x: x[1]):
-            lines.append(f'    * [{title}]({enc})')
+            lines.append(f'    - [{title}]({enc})')
     if '기타' in by_tag and by_tag['기타']:
-        lines.append('  * **기타**')
+        lines.append('  - 기타')
         for (_, title, enc) in sorted(by_tag['기타'], key=lambda x: x[1]):
-            lines.append(f'    * [{title}]({enc})')
+            lines.append(f'    - [{title}]({enc})')
     lines.append('')
 
     # 3. 📁 기존 폴더 구조별
-    lines.append('* **📁 기존 폴더 구조별**')
+    lines.append('- 📁 기존 폴더 구조별')
     def process_dir(path: Path, depth: int):
         try: items = sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower()))
         except: return
@@ -143,15 +143,15 @@ def generate_sidebar():
             ind = '  ' * depth
             if it.is_dir():
                 if any(p for p in it.rglob('*.md') if not any(i in IGNORE_DIRS for i in p.parts) and p.name not in IGNORE_FILES):
-                    lines.append(f"{ind}* **{it.name}**")
+                    lines.append(f"{ind}- {it.name}")
                     process_dir(it, depth + 1)
             elif it.is_file() and it.suffix.lower() == '.md':
-                lines.append(f"{ind}* [{clean_title(it.stem)}]({encode_path(it.with_suffix(''))})")
+                lines.append(f"{ind}- [{clean_title(it.stem)}]({encode_path(it.with_suffix(''))})")
 
     top_level = sorted([d for d in ROOT.iterdir() if d.is_dir() and d.name not in IGNORE_DIRS and not d.name.startswith('.')], key=lambda x: x.name.lower())
     for category in top_level:
         if any(p for p in category.rglob('*.md') if not any(i in IGNORE_DIRS for i in p.parts) and p.name not in IGNORE_FILES):
-            lines.append(f"  * **{category.name}**")
+            lines.append(f"  - {category.name}")
             process_dir(category, 2)
 
     ROOT.joinpath('_sidebar.md').write_text('\n'.join(lines), encoding='utf-8')
